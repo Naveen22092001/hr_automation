@@ -43,15 +43,17 @@ def login():
         return jsonify({"error": "Invalid username or password"}), 401
 ######################################################################################################
     
-@application.route("/api/inventory-request", methods=["POST"])
+@application.route("/api/inventory_request", methods=["POST"])
 def api_inventory_request():
     data = request.json
-    result = submit_inventory_request(
-        employee_name=data["employee_name"],
-        item_name=data["item_name"],
-        quantity=data["quantity"],
-        request_reason=data["request_reason"]
-    )
-    return jsonify(result)
+    employee_name = data.get("name")
+    tool_needed = data.get("tool_needed")
+    reason = data.get("reason")
+
+    if not all([employee_name, tool_needed, reason]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    result = submit_inventory_request(employee_name, tool_needed, reason)
+    return jsonify(result), 200
 ###########################################################################################################
 

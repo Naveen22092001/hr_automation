@@ -2,8 +2,8 @@ import smtplib
 from email.mime.text import MIMEText
 import logging
 
-SENDER_EMAIL = "youremail@gmail.com"
-SENDER_PASSWORD = "your_app_password"  # Replace with actual app password
+SENDER_EMAIL = "timesheetsystem2025@gmail.com"
+SENDER_PASSWORD = "mhuv nxdf ciqz igws" 
 
 def send_inventory_email_to_manager(employee_name, item_name, quantity, reason, manager_name, manager_email):
     try:
