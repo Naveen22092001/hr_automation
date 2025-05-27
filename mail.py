@@ -5,7 +5,7 @@ import logging
 SENDER_EMAIL = "timesheetsystem2025@gmail.com"
 SENDER_PASSWORD = "mhuv nxdf ciqz igws" 
 
-def send_inventory_email_to_manager(employee_name, item_name, quantity, reason, manager_name, manager_email):
+def send_inventory_email_to_manager( employee_name, tool_needed, reason, manager_name, manager_email):
     try:
         subject = f"Inventory Request from {employee_name}"
         body = f"""
@@ -13,8 +13,7 @@ Dear {manager_name},
 
 {employee_name} has requested the following item from inventory:
 
- Item: {item_name}
- Quantity: {quantity}
+ Item: {tool_needed}
  Reason: {reason}
  
 
