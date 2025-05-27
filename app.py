@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from flask_cors import CORS
 import logging
 import os
-from user_side import employee_login, submit_inventory_request
+from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
 
 application = Flask(__name__)
 
@@ -56,4 +56,21 @@ def api_inventory_request():
     result = submit_inventory_request(employee_name, tool_needed, reason)
     return jsonify(result), 200
 ###########################################################################################################
+@application.route('/api/inventory_details', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def inventory_details():
+    if request.method == 'GET':
+        return get_inventory()
 
+    data = request.get_json()
+
+    if request.method == 'POST':
+        return add_inventory(data)
+    elif request.method == 'PUT':
+        return edit_inventory(data)
+    elif request.method == 'DELETE':
+        return delete_inventory(data)
+
+    logging.warning("Invalid HTTP method used on /api/inventory_details endpoint.")
+    return jsonify({"success": False, "message": "Invalid request method"}), 405
+
+###################################################################################################################
