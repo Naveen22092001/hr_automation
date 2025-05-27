@@ -228,7 +228,7 @@ def edit_inventory(data):
 
 #     logging.info(f"Item '{item}' deleted successfully from {name}'s inventory.")
 #     return jsonify({"success": True, "deleted_item": item})
-def delete_assigned_inventory(data):
+def delete_inventory(data):
     employee_name = data.get("name")
     inventory_details = data.get("inventory_details")
 
