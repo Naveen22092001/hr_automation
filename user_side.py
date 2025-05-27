@@ -33,6 +33,32 @@ def get_manager_details(emp_name):
         return None, None
     
     
+# def submit_inventory_request(employee_name, tool_needed, reason):
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Inventory_requests"]
+
+#     request_data = {
+#         "employee_name": employee_name,
+#         "tool_needed": tool_needed,
+#         "reason": reason
+#     }
+
+#     collection.insert_one(request_data)
+
+#     manager_name, manager_email = get_manager_details(employee_name)
+#     if manager_name and manager_email:
+#         send_inventory_email_to_manager(
+#             employee_name,
+#             tool_needed,
+#             reason,
+#             manager_name,
+#             manager_email
+#         )
+
+#     return {"message": "Inventory request submitted successfully", "request": request_data}
+
+
 def submit_inventory_request(employee_name, tool_needed, reason):
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
@@ -56,8 +82,15 @@ def submit_inventory_request(employee_name, tool_needed, reason):
             manager_email
         )
 
-    return {"message": "Inventory request submitted successfully", "request": request_data}
-
+    # ✅ Make sure everything here is JSON-serializable
+    return {
+        "message": "Inventory request submitted successfully",
+        "request": {
+            "employee_name": employee_name,
+            "tool_needed": tool_needed,
+            "reason": reason
+        }
+    }
 
 def get_inventory_collection():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
