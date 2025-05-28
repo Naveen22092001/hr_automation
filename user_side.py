@@ -107,7 +107,7 @@ def get_inventory_collection():
 #     return jsonify({"assets": items})
 
 
-def get_employee_inventory():
+def get_inventory():
     name = request.args.get("name")
     if not name:
         logging.error("Employee name is required to fetch inventory.")
