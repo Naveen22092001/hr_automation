@@ -34,4 +34,4 @@ Timesheet System
 
         logging.info(f"📨 Email sent to {manager_email}")
     except Exception as e:
-        logging.error(f"❌ Failed to send email: {e}")
+        logging.error(f" Failed to send email: {e}")

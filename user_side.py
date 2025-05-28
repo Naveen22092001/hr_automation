@@ -1,5 +1,5 @@
 import logging
-from flask import jsonify
+from flask import jsonify, request
 from pymongo import MongoClient
 
 from mail import send_inventory_email_to_manager
@@ -72,15 +72,15 @@ def submit_inventory_request(employee_name, tool_needed, reason):
 
     collection.insert_one(request_data)
 
-    manager_name, manager_email = get_manager_details(employee_name)
-    if manager_name and manager_email:
-        send_inventory_email_to_manager(
-            employee_name,
-            tool_needed,
-            reason,
-            manager_name,
-            manager_email
-        )
+    # manager_name, manager_email = get_manager_details(employee_name)
+    # if manager_name and manager_email:
+    #     send_inventory_email_to_manager(
+    #         employee_name,
+    #         tool_needed,
+    #         reason,
+    #         manager_name,
+    #         manager_email
+    #     )
 
     # ✅ Make sure everything here is JSON-serializable
     return {
@@ -92,64 +92,6 @@ def submit_inventory_request(employee_name, tool_needed, reason):
         }
     }
 
-# def get_inventory_collection():
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     return db["Employee_Inventory_details"]
-
-# # Fetch all inventory items
-# def get_inventory():
-#     logging.info("Fetching all inventory items from the database.")
-#     collection = get_inventory_collection()
-#     items = list(collection.find({}, {"_id": 0}))
-#     logging.info(f"{len(items)} inventory items retrieved.")
-#     return jsonify({"assets": items})
-
-# # Add a new inventory item
-# def add_inventory(data):
-#     item_name = data.get("item")
-#     quantity = data.get("quantity")
-#     logging.info(f"Adding new inventory item: {item_name} with quantity: {quantity}")
-
-#     collection = get_inventory_collection()
-#     if collection.find_one({"item": item_name}):
-#         logging.warning(f"Item '{item_name}' already exists in inventory.")
-#         return jsonify({"success": False, "message": "Item already exists"}), 400
-
-#     collection.insert_one({"item": item_name, "quantity": quantity})
-#     logging.info(f"Item '{item_name}' added successfully to inventory.")
-#     return jsonify({"success": True, "asset": {"item": item_name, "quantity": quantity}})
-
-# # Update an existing inventory item
-# def edit_inventory(data):
-#     item_name = data.get("item")
-#     quantity = data.get("quantity")
-#     logging.info(f"Updating inventory item: {item_name} to new quantity: {quantity}")
-
-#     collection = get_inventory_collection()
-#     result = collection.update_one({"item": item_name}, {"$set": {"quantity": quantity}})
-#     if result.matched_count == 0:
-#         logging.error(f"Item '{item_name}' not found in inventory for update.")
-#         return jsonify({"success": False, "message": "Item not found"}), 404
-
-#     logging.info(f"Inventory item '{item_name}' updated successfully.")
-#     return jsonify({"success": True, "message": "Asset updated"})
-
-# # Delete an inventory item
-# def delete_inventory(data):
-#     item_name = data.get("item")
-#     logging.info(f"Deleting inventory item: {item_name}")
-
-#     collection = get_inventory_collection()
-#     result = collection.delete_one({"item": item_name})
-#     if result.deleted_count == 0:
-#         logging.error(f"Item '{item_name}' not found in inventory for deletion.")
-#         return jsonify({"success": False, "message": "Item not found"}), 404
-
-#     logging.info(f"Inventory item '{item_name}' deleted successfully.")
-#     return jsonify({"success": True, "deleted_item": item_name})
-
-
 
 def get_inventory_collection():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
@@ -157,13 +99,29 @@ def get_inventory_collection():
     return db["Employee_Inventory_details"]
 
 # Fetch all employee inventory assignments
-def get_inventory():
-    logging.info("Fetching all employee inventory assignments from the database.")
-    collection = get_inventory_collection()
-    items = list(collection.find({}, {"_id": 0}))
-    logging.info(f"{len(items)} employee inventory records retrieved.")
-    return jsonify({"assets": items})
+# def get_inventory():
+#     logging.info("Fetching all employee inventory assignments from the database.")
+#     collection = get_inventory_collection()
+#     items = list(collection.find({}, {"_id": 0}))
+#     logging.info(f"{len(items)} employee inventory records retrieved.")
+#     return jsonify({"assets": items})
 
+
+def get_employee_inventory():
+    name = request.args.get("name")
+    if not name:
+        logging.error("Employee name is required to fetch inventory.")
+        return jsonify({"success": False, "message": "Employee name is required"}), 400
+
+    logging.info(f"Fetching inventory for employee: {name}")
+    collection = get_inventory_collection()
+    employee_data = collection.find_one({"name": name}, {"_id": 0})
+
+    if not employee_data:
+        logging.warning(f"No inventory found for employee: {name}")
+        return jsonify({"success": False, "message": "No inventory found for this employee"}), 404
+
+    return jsonify({"success": True, "inventory": employee_data})
 # Add or update an inventory item for an employee
 def add_inventory(data):
     name = data.get("name")
