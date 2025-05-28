@@ -99,29 +99,29 @@ def get_inventory_collection():
     return db["Employee_Inventory_details"]
 
 # Fetch all employee inventory assignments
-# def get_inventory():
-#     logging.info("Fetching all employee inventory assignments from the database.")
-#     collection = get_inventory_collection()
-#     items = list(collection.find({}, {"_id": 0}))
-#     logging.info(f"{len(items)} employee inventory records retrieved.")
-#     return jsonify({"assets": items})
-
-
 def get_inventory():
-    name = request.args.get("name")
-    if not name:
-        logging.error("Employee name is required to fetch inventory.")
-        return jsonify({"success": False, "message": "Employee name is required"}), 400
-
-    logging.info(f"Fetching inventory for employee: {name}")
+    logging.info("Fetching all employee inventory assignments from the database.")
     collection = get_inventory_collection()
-    employee_data = collection.find_one({"name": name}, {"_id": 0})
+    items = list(collection.find({}, {"_id": 0}))
+    logging.info(f"{len(items)} employee inventory records retrieved.")
+    return jsonify({"assets": items})
 
-    if not employee_data:
-        logging.warning(f"No inventory found for employee: {name}")
-        return jsonify({"success": False, "message": "No inventory found for this employee"}), 404
 
-    return jsonify({"success": True, "inventory": employee_data})
+# def get_inventory():
+#     name = request.args.get("name")
+#     if not name:
+#         logging.error("Employee name is required to fetch inventory.")
+#         return jsonify({"success": False, "message": "Employee name is required"}), 400
+
+#     logging.info(f"Fetching inventory for employee: {name}")
+#     collection = get_inventory_collection()
+#     employee_data = collection.find_one({"name": name}, {"_id": 0})
+
+#     if not employee_data:
+#         logging.warning(f"No inventory found for employee: {name}")
+#         return jsonify({"success": False, "message": "No inventory found for this employee"}), 404
+
+#     return jsonify({"success": True, "inventory": employee_data})
 # Add or update an inventory item for an employee
 def add_inventory(data):
     name = data.get("name")
