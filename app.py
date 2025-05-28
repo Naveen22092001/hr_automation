@@ -68,7 +68,7 @@ def inventory_details():
     elif request.method == 'PUT':
         return edit_inventory(data)
     elif request.method == 'DELETE':
-        return delete_inventory()
+        return delete_inventory(data)
 
     logging.warning("Invalid HTTP method used on /api/inventory_details endpoint.")
     return jsonify({"success": False, "message": "Invalid request method"}), 405
