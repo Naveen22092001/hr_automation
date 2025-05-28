@@ -186,26 +186,32 @@ def edit_inventory(data):
 
 #     logging.info(f"Item '{item}' deleted successfully from {name}'s inventory.")
 #     return jsonify({"success": True, "deleted_item": item})
-def delete_inventory(data):
-    employee_name = data.get("name")
-    inventory_details = data.get("inventory_details")
+def delete_inventory():
+    try:
+        data = request.get_json()
+        employee_name = data.get("name")
+        inventory_details = data.get("inventory_details")
 
-    if not employee_name or not inventory_details:
-        logging.error("Missing 'name' or 'inventory_details' in request data.")
-        return jsonify({"success": False, "message": "Invalid request data"}), 400
+        if not employee_name or not inventory_details:
+            logging.error("Missing 'name' or 'inventory_details' in request data.")
+            return jsonify({"success": False, "message": "Invalid request data"}), 400
 
-    item_name = next(iter(inventory_details))  # Get the first key from inventory_details
+        item_name = next(iter(inventory_details))  # Get the first key from inventory_details
 
-    collection = get_inventory_collection("Employee_Inventory_details")
+        collection = get_inventory_collection("Employee_Inventory_details")
 
-    result = collection.update_one(
-        {"name": employee_name},
-        {"$unset": {f"inventory_details.{item_name}": ""}}
-    )
+        result = collection.update_one(
+            {"name": employee_name},
+            {"$unset": {f"inventory_details.{item_name}": ""}}
+        )
 
-    if result.modified_count == 0:
-        logging.warning("No matching record found to delete item '%s' for employee '%s'.", item_name, employee_name)
-        return jsonify({"success": False, "message": "Item not found for employee"}), 404
+        if result.modified_count == 0:
+            logging.warning("No matching record found to delete item '%s' for employee '%s'.", item_name, employee_name)
+            return jsonify({"success": False, "message": "Item not found for employee"}), 404
 
-    logging.info("Item '%s' removed from inventory assigned to employee '%s'.", item_name, employee_name)
-    return jsonify({"success": True, "message": f"Item '{item_name}' removed for employee '{employee_name}'"})
+        logging.info("Item '%s' removed from inventory assigned to employee '%s'.", item_name, employee_name)
+        return jsonify({"success": True, "message": f"Item '{item_name}' removed for employee '{employee_name}'"}), 200
+
+    except Exception as e:
+        logging.exception("Error deleting inventory item")
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
