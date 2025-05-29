@@ -4,7 +4,7 @@ from flask_cors import CORS
 import logging
 import os
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
-from admin_side import fetch_all_inventory_details
+from admin_side import fetch_all_inventory_details, get_inventory_collection
 application = Flask(__name__)
 
 # Logging setup
@@ -75,10 +75,30 @@ def inventory_details():
 
 ###################################################################################################################
 
+# @application.route('/api/inventory_management', methods=['GET'])
+# def get_inventory_management():
+#     try:
+#         inventories = fetch_all_inventory_details()
+#         return jsonify({"inventories": inventories}), 200
+#     except Exception as e:
+#         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+    
+###################################################################################################################
+
 @application.route('/api/inventory_management', methods=['GET'])
 def get_inventory_management():
     try:
-        inventories = fetch_all_inventory_details()
-        return jsonify({"inventories": inventories}), 200
+        name = request.args.get("name")
+        if name:
+            # If name is provided, return a single employee's inventory
+            collection = get_inventory_collection()
+            employee = collection.find_one({"name": name}, {"_id": 0, "name": 1, "inventory_details": 1})
+            if not employee:
+                return jsonify({"success": False, "message": "Employee not found"}), 404
+            return jsonify({"success": True, "inventory": employee}), 200
+        else:
+            # Otherwise, return all inventory records
+            inventories = fetch_all_inventory_details()
+            return jsonify({"inventories": inventories}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500

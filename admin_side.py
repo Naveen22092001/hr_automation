@@ -65,3 +65,4 @@ def fetch_all_inventory_details():
         for employee in raw_data
     ]
     return formatted_data
+
