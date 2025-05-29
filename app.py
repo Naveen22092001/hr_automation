@@ -104,6 +104,6 @@ def get_inventory_management():
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
     
 ######################################################################################################################
-application.route('/api/inventory_management', methods=['POST'])
+@application.route('/api/inventory_management', methods=['POST'])
 def handle_inventory_management():
     return add_available_inventory()
