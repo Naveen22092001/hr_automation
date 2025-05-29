@@ -1,50 +1,6 @@
 from pymongo import MongoClient
-
-# # Add inventory items to the collection from the admin side
-# def add_inventory_item(item_name, quantity):
-#     try:
-#         client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#         db = client["Timesheet"]
-#         collection = db["Inventory_stock"]
-#         inventory_data = {
-#             "item_name": item_name,
-#             "quantity": quantity
-#         }
-#         collection.insert_one(inventory_data)
-#         return {"message": "Inventory item added successfully", "item": inventory_data}
-#     except Exception as e:
-#         return {"error": f"Failed to add inventory item: {str(e)}"}
-
-# # To get all the inventory item 
-# def get_all_inventory_stock():
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     collection = db["Inventory_stock"]
-#     items = list(collection.find({}, {"_id": 0})) 
-#     return items
-
-# #To get all the inventory items in use
-# def get_all_inventory_in_use():
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     collection = db["Inventory_in_use"]
-#     items = list(collection.find({}, {"_id": 0})) 
-#     return items
-
-# def assign_inventory_to_employee(employee_name, item_name, quantity):
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     collection = db["Assigned_inventory"]
-
-#     assigned_data = {
-#         "employee_name": employee_name,
-#         "item_name": item_name,
-#         "quantity": quantity
-#     }
-
-#     collection.insert_one(assigned_data)
-#     return {"message": "Inventory assigned successfully", "data": assigned_data}
-
+from flask import jsonify, request
+from pymongo import MongoClient
 
 def get_inventory_collection():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
@@ -65,9 +21,6 @@ def fetch_all_inventory_details():
         for employee in raw_data
     ]
     return formatted_data
-
-from flask import jsonify, request
-from pymongo import MongoClient
 
 def add_available_inventory():
     """
@@ -103,4 +56,18 @@ def add_available_inventory():
     except Exception as e:
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 
+
+def fetch_available_inventory_data():
+    """
+    Connects to MongoDB and retrieves all available inventory items from the Available_Inventory collection.
+    Returns:
+        List[Dict]: A list of available inventory items without MongoDB _id field.
+    """
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    collection = db["Available_Inventory"]
+
+    # Fetch all inventory items and exclude the _id field
+    inventory_data = list(collection.find({}, {"_id": 0}))
+    return inventory_data
 
