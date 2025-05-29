@@ -57,17 +57,36 @@ def add_available_inventory():
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 
 
+# def fetch_available_inventory_data():
+#     """
+#     Connects to MongoDB and retrieves all available inventory items from the Available_Inventory collection.
+#     Returns:
+#         List[Dict]: A list of available inventory items without MongoDB _id field.
+#     """
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Available_Inventory"]
+
+#     # Fetch all inventory items and exclude the _id field
+#     inventory_data = list(collection.find({}, {"_id": 0}))
+#     return inventory_data
+
 def fetch_available_inventory_data():
     """
     Connects to MongoDB and retrieves all available inventory items from the Available_Inventory collection.
     Returns:
-        List[Dict]: A list of available inventory items without MongoDB _id field.
+        Dict: A dictionary mapping item names to their quantities.
     """
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
     collection = db["Available_Inventory"]
 
-    # Fetch all inventory items and exclude the _id field
-    inventory_data = list(collection.find({}, {"_id": 0}))
-    return inventory_data
+    inventory_data = collection.find({})
+    inventory_dict = {}
 
+    for item in inventory_data:
+        for key, value in item.items():
+            if key != "_id":
+                inventory_dict[key] = value
+
+    return inventory_dict
