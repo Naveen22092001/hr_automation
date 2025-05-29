@@ -66,3 +66,41 @@ def fetch_all_inventory_details():
     ]
     return formatted_data
 
+from flask import jsonify, request
+from pymongo import MongoClient
+
+def add_available_inventory():
+    """
+    Adds or increments an item in the Available_inventory collection.
+    Expects JSON with 'action', 'item', and 'quantity'.
+    """
+    try:
+        data = request.get_json()
+        action = data.get("action")
+        item = data.get("item")
+        quantity = data.get("quantity")
+
+        if not all([action, item, quantity]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+
+        if action != "add":
+            return jsonify({"success": False, "message": "Unsupported action"}), 400
+
+        # MongoDB connection and collection
+        client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+        db = client["Timesheet"]
+        collection = db["Available_Inventory"]
+
+        # Increment or add the item
+        collection.update_one(
+            {},  # Using a single document to track all inventory items
+            {"$inc": {item: quantity}},
+            upsert=True
+        )
+
+        return jsonify({"success": True, "message": f"{item} added with quantity {quantity}"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+
+

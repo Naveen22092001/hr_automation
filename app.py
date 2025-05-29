@@ -4,7 +4,7 @@ from flask_cors import CORS
 import logging
 import os
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
-from admin_side import fetch_all_inventory_details, get_inventory_collection
+from admin_side import add_available_inventory, fetch_all_inventory_details, get_inventory_collection
 application = Flask(__name__)
 
 # Logging setup
@@ -84,7 +84,7 @@ def inventory_details():
 #         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
     
 ###################################################################################################################
-
+#This is used to get the inventory details in admin side of the employees
 @application.route('/api/inventory_management', methods=['GET'])
 def get_inventory_management():
     try:
@@ -102,3 +102,8 @@ def get_inventory_management():
             return jsonify({"inventories": inventories}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+    
+######################################################################################################################
+application.route('/api/inventory_management', methods=['POST'])
+def handle_inventory_management():
+    return add_available_inventory()
