@@ -4,7 +4,7 @@ from flask_cors import CORS
 import logging
 import os
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
-
+from admin_side import fetch_all_inventory_details
 application = Flask(__name__)
 
 # Logging setup
@@ -74,3 +74,11 @@ def inventory_details():
     return jsonify({"success": False, "message": "Invalid request method"}), 405
 
 ###################################################################################################################
+
+@application.route('/api/inventory_management', methods=['GET'])
+def get_inventory_management():
+    try:
+        inventories = fetch_all_inventory_details()
+        return jsonify({"inventories": inventories}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
