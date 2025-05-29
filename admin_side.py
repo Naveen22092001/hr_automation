@@ -57,20 +57,6 @@ def add_available_inventory():
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 
 
-# def fetch_available_inventory_data():
-#     """
-#     Connects to MongoDB and retrieves all available inventory items from the Available_Inventory collection.
-#     Returns:
-#         List[Dict]: A list of available inventory items without MongoDB _id field.
-#     """
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     collection = db["Available_Inventory"]
-
-#     # Fetch all inventory items and exclude the _id field
-#     inventory_data = list(collection.find({}, {"_id": 0}))
-#     return inventory_data
-
 def fetch_available_inventory_data():
     """
     Connects to MongoDB and retrieves all available inventory items from the Available_Inventory collection.
@@ -90,3 +76,53 @@ def fetch_available_inventory_data():
                 inventory_dict[key] = value
 
     return inventory_dict
+
+
+def modify_available_inventory():
+    try:
+        data = request.get_json()
+        action = data.get("action")
+        asset = data.get("asset")
+        quantity = data.get("quantity")
+
+        if not all([action, asset, quantity]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+
+        client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+        db = client["Timesheet"]
+        collection = db["Available_Inventory"]
+
+        if action == "edit":
+            # Update the asset's quantity
+            result = collection.update_one(
+                {asset: {"$exists": True}},
+                {"$set": {asset: quantity}}
+            )
+            if result.matched_count == 0:
+                return jsonify({"success": False, "message": f"{asset} not found"}), 404
+            return jsonify({"success": True, "message": f"{asset} quantity updated to {quantity}"}), 200
+
+        elif action == "delete":
+            # Reduce the quantity
+            existing_doc = collection.find_one({asset: {"$exists": True}})
+            if not existing_doc:
+                return jsonify({"success": False, "message": f"{asset} not found"}), 404
+            
+            current_quantity = existing_doc[asset]
+            new_quantity = current_quantity - quantity
+
+            if new_quantity <= 0:
+                collection.delete_one({asset: {"$exists": True}})
+                return jsonify({"success": True, "message": f"{asset} completely removed"}), 200
+            else:
+                collection.update_one(
+                    {asset: {"$exists": True}},
+                    {"$set": {asset: new_quantity}}
+                )
+                return jsonify({"success": True, "message": f"{asset} quantity reduced to {new_quantity}"}), 200
+
+        else:
+            return jsonify({"success": False, "message": "Invalid action"}), 400
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500

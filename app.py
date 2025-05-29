@@ -4,7 +4,7 @@ from flask_cors import CORS
 import logging
 import os
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
-from admin_side import add_available_inventory, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection
+from admin_side import add_available_inventory, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
 application = Flask(__name__)
 
 # Logging setup
@@ -109,21 +109,6 @@ def handle_inventory_management():
     return add_available_inventory()
 ######################################################################################################################
 
-# @application.route('/api/inventory_available', methods=['GET'])
-# def get_available_inventory():
-#     try:
-#         inventory_data = fetch_available_inventory_data()
-#         return jsonify({
-#             "success": True,
-#             "available_inventory": inventory_data
-#         }), 200
-#     except Exception as e:
-#         return jsonify({
-#             "success": False,
-#             "message": f"Server error: {str(e)}"
-#         }), 500
-
-
 @application.route('/api/inventory_available', methods=['GET'])
 def get_available_inventory():
     try:
@@ -137,3 +122,10 @@ def get_available_inventory():
             "success": False,
             "message": f"Server error: {str(e)}"
         }), 500
+    
+########################################################################################################################
+
+@application.route('/api/inventory_available', methods=['POST'])
+def handle_inventory_modification():
+    return modify_available_inventory()
+##########################################################################################################################
