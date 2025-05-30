@@ -4,7 +4,7 @@ from flask_cors import CORS
 import logging
 import os
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
-from admin_side import add_available_inventory, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
+from admin_side import add_available_inventory, delete_inventory_items, edit_inventory_item, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
 application = Flask(__name__)
 
 # Logging setup
@@ -114,8 +114,34 @@ def get_available_inventory():
         }), 500
     
 ########################################################################################################################
-
 @application.route('/api/inventory_available', methods=['POST'])
 def handle_inventory_modification():
     return modify_available_inventory()
 ##########################################################################################################################
+@application.route("/api/inventory_management", methods=["PUT", "DELETE"])
+def inventory_management():
+    data = request.get_json()
+    name = data.get("name")
+
+    if request.method == "PUT":
+        action = data.get("action")
+        original_item = data.get("original_item")
+        new_item = data.get("item")
+        quantity = data.get("quantity")
+
+        if action != "edit" or not all([name, original_item, new_item, quantity is not None]):
+            return jsonify({"success": False, "message": "Invalid PUT data"}), 400
+
+        result, status_code = edit_inventory_item(name, original_item, new_item, quantity)
+        return jsonify(result), status_code
+
+    elif request.method == "DELETE":
+        inventory_details = data.get("inventory_details")
+        if not inventory_details or not isinstance(inventory_details, dict):
+            return jsonify({"success": False, "message": "Invalid DELETE payload"}), 400
+
+        result, status_code = delete_inventory_items(name, inventory_details)
+        return jsonify(result), status_code
+
+    return jsonify({"success": False, "message": "Unsupported HTTP method"}), 405
+#####################################################################################################################################
