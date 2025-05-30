@@ -63,10 +63,8 @@ def get_manager_details(emp_name):
 #         "message": "Inventory request submitted successfully",
 #         "request": request_data
 #     }
-
-from pymongo import MongoClient
 from bson import ObjectId
-from inventory_email import send_inventory_email_to_manager  # assuming this is in a separate file
+  # assuming this is in a separate file
 
 def submit_inventory_request(employee_name, tool_needed, reason):
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
