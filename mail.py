@@ -42,9 +42,8 @@ from email.mime.text import MIMEText
 import logging
 
 SENDER_EMAIL = "timesheetsystem2025@gmail.com"
-SENDER_PASSWORD = "mhuv nxdf ciqz igws"  
+SENDER_PASSWORD = "mhuv nxdf ciqz igws"
 
-# Fixed CC email
 FIXED_CC_EMAILS = ["naveen@singhautomation.com"]
 
 def send_inventory_email_to_manager(employee_name, tool_needed, reason, manager_name, manager_email):
@@ -70,7 +69,6 @@ Timesheet System
         msg["To"] = manager_email
         msg["Cc"] = ", ".join(FIXED_CC_EMAILS)
 
-        # Combine To + CC for sending
         recipients = [manager_email] + FIXED_CC_EMAILS
 
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
@@ -80,4 +78,3 @@ Timesheet System
         logging.info(f"📨 Email sent to {manager_email} with CC to {FIXED_CC_EMAILS}")
     except Exception as e:
         logging.error(f"❌ Failed to send email: {e}")
-
