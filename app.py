@@ -56,7 +56,7 @@ def api_inventory_request():
     result = submit_inventory_request(employee_name, tool_needed, reason)
     return jsonify(result), 200
 ###########################################################################################################
-@application.route('/api/inventory_details', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@application.route('/api/inventory_details', methods=['GET', 'POST'])
 def inventory_details():
     if request.method == 'GET':
         return get_inventory()
@@ -65,10 +65,10 @@ def inventory_details():
 
     if request.method == 'POST':
         return add_inventory(data)
-    elif request.method == 'PUT':
-        return edit_inventory(data)
-    elif request.method == 'DELETE':
-        return delete_inventory(data)
+    # elif request.method == 'PUT':
+    #     return edit_inventory(data)
+    # elif request.method == 'DELETE':
+    #     return delete_inventory(data)
 
     logging.warning("Invalid HTTP method used on /api/inventory_details endpoint.")
     return jsonify({"success": False, "message": "Invalid request method"}), 405

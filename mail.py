@@ -44,7 +44,7 @@ import logging
 SENDER_EMAIL = "timesheetsystem2025@gmail.com"
 SENDER_PASSWORD = "mhuv nxdf ciqz igws"
 
-FIXED_CC_EMAILS = ["naveen@singhautomation.com"]
+FIXED_CC_EMAILS = ["rohini@singhautomation.com"]
 
 def send_inventory_email_to_manager(employee_name, tool_needed, reason, manager_name, manager_email):
     try:
