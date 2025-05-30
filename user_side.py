@@ -243,15 +243,15 @@ def submit_inventory_request(employee_name, tool_needed, reason):
     collection.insert_one(request_data)
 
     # Optionally email manager
-    # manager_name, manager_email = get_manager_details(employee_name)
-    # if manager_name and manager_email:
-    #     send_inventory_email_to_manager(
-    #         employee_name,
-    #         tool_needed,
-    #         reason,
-    #         manager_name,
-    #         manager_email
-    #     )
+    manager_name, manager_email = get_manager_details(employee_name)
+    if manager_name and manager_email:
+        send_inventory_email_to_manager(
+            employee_name,
+            tool_needed,
+            reason,
+            manager_name,
+            manager_email
+        )
 
     return {
         "message": "Inventory request submitted successfully",

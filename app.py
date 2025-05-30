@@ -72,16 +72,6 @@ def inventory_details():
 
     logging.warning("Invalid HTTP method used on /api/inventory_details endpoint.")
     return jsonify({"success": False, "message": "Invalid request method"}), 405
-
-###################################################################################################################
-
-# @application.route('/api/inventory_management', methods=['GET'])
-# def get_inventory_management():
-#     try:
-#         inventories = fetch_all_inventory_details()
-#         return jsonify({"inventories": inventories}), 200
-#     except Exception as e:
-#         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
     
 ###################################################################################################################
 #This is used to get the inventory details in admin side of the employees
