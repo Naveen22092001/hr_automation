@@ -148,7 +148,7 @@ def inventory_management():
 
 
 
-@application.route("/api/employees-by-manager", methods=["GET"])
+@application.route("/api/one_on_one_meetings", methods=["GET"])
 def get_employees_by_manager():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
