@@ -162,3 +162,5 @@ def delete_inventory_items(name, inventory_details):
         return {"success": False, "message": "Nothing deleted or item(s) not found"}, 404
 
     return {"success": True, "message": "Item(s) deleted successfully"}, 200
+
+

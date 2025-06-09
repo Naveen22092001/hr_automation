@@ -145,3 +145,17 @@ def inventory_management():
 
     return jsonify({"success": False, "message": "Unsupported HTTP method"}), 405
 #####################################################################################################################################
+
+
+
+@application.route("/api/employees-by-manager", methods=["GET"])
+def get_employees_by_manager():
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    collection = db["EmployeeMeetings"]
+    manager_name = request.args.get("manager")
+    if not manager_name:
+        return jsonify({"error": "Manager name is required"}), 400
+
+    employees = list(collection.find({"manager": manager_name}, {"_id": 0}))
+    return jsonify({"employees": employees}), 200

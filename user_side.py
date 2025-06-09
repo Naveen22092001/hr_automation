@@ -34,35 +34,6 @@ def get_manager_details(emp_name):
         print(f"No manager found for employee: {emp_name}")
         return None, None
 
-
-# def submit_inventory_request(employee_name, tool_needed, reason):
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     collection = db["Inventory_requests"]
-
-#     request_data = {
-#         "employee_name": employee_name,
-#         "tool_needed": tool_needed,
-#         "reason": reason
-#     }
-
-#     collection.insert_one(request_data)
-
-#     # Optionally email manager
-#     manager_name, manager_email = get_manager_details(employee_name)
-#     if manager_name and manager_email:
-#         send_inventory_email_to_manager(
-#             employee_name,
-#             tool_needed,
-#             reason,
-#             manager_name,
-#             manager_email
-#         )
-
-#     return {
-#         "message": "Inventory request submitted successfully",
-#         "request": request_data
-#     }
 from bson import ObjectId
 
 def submit_inventory_request(employee_name, tool_needed, reason):
