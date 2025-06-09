@@ -148,17 +148,28 @@ def inventory_management():
 
 
 
+# @application.route("/api/one_on_one_meetings", methods=["GET"])
+# def get_employees_by_manager():
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    
+#     db = client["Timesheet"]
+#     collection = db["Employee_meetingdetails"]
+#     manager_name = request.args.get("manager")
+#     if not manager_name:
+#         return jsonify({"error": "Manager name is required"}), 400
+
+#     employees = list(collection.find({"manager": manager_name}, {"_id": 0}))
+#     return jsonify({"employees": employees}), 200
+
 @application.route("/api/one_on_one_meetings", methods=["GET"])
-def get_employees_by_manager():
+def get_all_meeting_details():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
     collection = db["Employee_meetingdetails"]
-    manager_name = request.args.get("manager")
-    if not manager_name:
-        return jsonify({"error": "Manager name is required"}), 400
 
-    employees = list(collection.find({"manager": manager_name}, {"_id": 0}))
-    return jsonify({"employees": employees}), 200
+    meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
+
+    return jsonify({"meetings": meetings}), 200
 
 
 
