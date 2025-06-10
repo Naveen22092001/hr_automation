@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from flask_cors import CORS
 import logging
 import os
+from one_on_one import save_meeting_to_db
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
 from admin_side import add_available_inventory, delete_inventory_items, edit_inventory_item, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
 application = Flask(__name__)
@@ -166,4 +167,10 @@ def get_all_performance_meeting_details():
     meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
 
     return jsonify({"meetings": meetings}), 200
+
+@application.route("/api/one_on_one_meetings", methods=["POST"])
+def save_one_on_one_meeting():
+    data = request.get_json()
+    response, status_code = save_meeting_to_db(data)
+    return jsonify(response), status_code
 
