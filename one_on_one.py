@@ -26,7 +26,7 @@ def save_meeting_to_db(data):
 def save_performance_meeting_to_db(data):
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
-    collection = db["Employee_meetingdetails"]
+    collection = db["Employee_performance_meeting"]
 
     required_fields = ["name", "manager", "month", "year", "isCompleted", "notes"]
     for field in required_fields:
