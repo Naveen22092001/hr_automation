@@ -146,21 +146,6 @@ def inventory_management():
     return jsonify({"success": False, "message": "Unsupported HTTP method"}), 405
 #####################################################################################################################################
 
-
-
-# @application.route("/api/one_on_one_meetings", methods=["GET"])
-# def get_employees_by_manager():
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    
-#     db = client["Timesheet"]
-#     collection = db["Employee_meetingdetails"]
-#     manager_name = request.args.get("manager")
-#     if not manager_name:
-#         return jsonify({"error": "Manager name is required"}), 400
-
-#     employees = list(collection.find({"manager": manager_name}, {"_id": 0}))
-#     return jsonify({"employees": employees}), 200
-
 @application.route("/api/one_on_one_meetings", methods=["GET"])
 def get_all_meeting_details():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
@@ -172,40 +157,13 @@ def get_all_meeting_details():
     return jsonify({"meetings": meetings}), 200
 
 
+@application.route("/api/performance_meetings", methods=["GET"])
+def get_all_performance_meeting_details():
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    collection = db["Employee_performance_meeting"]
 
-# client = MongoClient("your_mongodb_connection_string_here")
-# db = client["Timesheet"]
-# collection = db["Employee_data"]  # Your collection name with the data
+    meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
 
-# @app.route("/api/one_on_one_meetings", methods=["GET"])
-# def one_on_one_meetings():
-#     try:
-#         # Fetch all users with meeting info (you can filter if needed)
-#         meetings_cursor = collection.find({}, {
-#             "name": 1,
-#             "month": 1,
-#             "year": 1,
-#             "isCompleted": 1,
-#             "notes": 1,
-#             "manager": 1,
-#             "_id": 0
-#         })
+    return jsonify({"meetings": meetings}), 200
 
-#         meetings = []
-#         for doc in meetings_cursor:
-#             meetings.append({
-#                 "employee": doc.get("name"),
-#                 "month": doc.get("month"),
-#                 "year": doc.get("year"),
-#                 "isCompleted": doc.get("isCompleted"),
-#                 "notes": doc.get("notes"),
-#                 "manager": doc.get("manager")
-#             })
-
-#         return jsonify({"success": True, "meetings": meetings}), 200
-#     except Exception as e:
-#         return jsonify({"success": False, "error": str(e)}), 500
-
-
-# if __name__ == "__main__":
-#     app.run(debug=True)
