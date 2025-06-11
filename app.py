@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from flask_cors import CORS
 import logging
 import os
+from meetings import fetch_meetings_for_month, save_meeting_status
 from one_on_one import save_meeting_to_db,save_performance_meeting_to_db
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
 from admin_side import add_available_inventory, delete_inventory_items, edit_inventory_item, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
@@ -147,35 +148,55 @@ def inventory_management():
     return jsonify({"success": False, "message": "Unsupported HTTP method"}), 405
 #####################################################################################################################################
 
+# @application.route("/api/one_on_one_meetings", methods=["GET"])
+# def get_all_meeting_details():
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Employee_meetingdetails"]
+
+#     meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
+
+#     return jsonify({"meetings": meetings}), 200
+
+
+# @application.route("/api/performance_meetings", methods=["GET"])
+# def get_all_performance_meeting_details():
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Employee_performance_meeting"]
+
+#     meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
+
+#     return jsonify({"meetings": meetings}), 200
+
+# @application.route("/api/one_on_one_meetings", methods=["POST"])
+# def save_one_on_one_meeting():
+#     data = request.get_json()
+#     response, status_code = save_meeting_to_db(data)
+#     return jsonify(response), status_code
+
+# @application.route("/api/performance_meetings", methods=["POST"])
+# def save_performance_meeting():
+#     data = request.get_json()
+#     response, status_code =save_performance_meeting_to_db(data)
+#     return jsonify(response), status_code
+
 @application.route("/api/one_on_one_meetings", methods=["GET"])
-def get_all_meeting_details():
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    collection = db["Employee_meetingdetails"]
+def api_get_meetings():
+    manager = request.args.get("manager")  # optional filter
+    month   = request.args.get("month")
+    year    = request.args.get("year")
 
-    meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
+    if not (month and year):
+        return jsonify({"error": "month & year query params are required"}), 400
 
-    return jsonify({"meetings": meetings}), 200
+    data = fetch_meetings_for_month(manager, month, year)
+    return jsonify({"meetings": data}), 200
 
 
-@application.route("/api/performance_meetings", methods=["GET"])
-def get_all_performance_meeting_details():
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    collection = db["Employee_performance_meeting"]
-
-    meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
-
-    return jsonify({"meetings": meetings}), 200
-
+# -------- POST /api/one_on_one_meetings --------------------------------
 @application.route("/api/one_on_one_meetings", methods=["POST"])
-def save_one_on_one_meeting():
-    data = request.get_json()
-    response, status_code = save_meeting_to_db(data)
-    return jsonify(response), status_code
-
-@application.route("/api/performance_meetings", methods=["POST"])
-def save_performance_meeting():
-    data = request.get_json()
-    response, status_code =save_performance_meeting_to_db(data)
-    return jsonify(response), status_code
+def api_save_status():
+    payload = request.get_json() or {}
+    resp, code = save_meeting_status(payload)
+    return jsonify(resp), code
