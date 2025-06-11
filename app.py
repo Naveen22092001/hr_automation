@@ -182,23 +182,30 @@ def inventory_management():
 
 @application.route('/api/one_on_one_meetings', methods=['GET'])
 def map_managers_to_employees():
-    # Fetch all employee records
+    # Connect to MongoDB
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
+    # Fetch all employee records
     employees = db.Employee_meetingdetails.find()
 
-    # Initialize the manager-employee mapping dictionary
+    # Manager to employees map
     manager_map = {}
 
     for emp in employees:
         manager = emp.get("manager")
         employee_name = emp.get("name")
+        designation = emp.get("designation", "")  # Default to empty string if not present
 
         if manager:
             if manager not in manager_map:
                 manager_map[manager] = []
-            manager_map[manager].append(employee_name)
+
+            # Add name + designation
+            manager_map[manager].append({
+                "name": employee_name,
+                "designation": designation
+            })
 
     return jsonify({
         "success": True,
