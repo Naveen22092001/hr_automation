@@ -147,16 +147,38 @@ def inventory_management():
     return jsonify({"success": False, "message": "Unsupported HTTP method"}), 405
 #####################################################################################################################################
 
+# @application.route("/api/one_on_one_meetings", methods=["GET"])
+# def get_all_meeting_details():
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Employee_meetingdetails"]
+
+#     meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
+
+#     return jsonify({"meetings": meetings}), 200
+
 @application.route("/api/one_on_one_meetings", methods=["GET"])
-def get_all_meeting_details():
+def get_meetings_by_month_year():
+    from flask import request
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
     collection = db["Employee_meetingdetails"]
 
-    meetings = list(collection.find({}, {"_id": 0}))  # Exclude _id from results
+    # Get month and year from query params
+    month = request.args.get("month")
+    year = request.args.get("year")
+
+    # Validate inputs
+    if not month or not year:
+        return jsonify({"error": "Both 'month' and 'year' query parameters are required."}), 400
+
+    # Query based on month and year
+    meetings = list(collection.find(
+        {"month": month, "year": year},
+        {"_id": 0}  # Exclude _id field
+    ))
 
     return jsonify({"meetings": meetings}), 200
-
 
 @application.route("/api/performance_meetings", methods=["GET"])
 def get_all_performance_meeting_details():
