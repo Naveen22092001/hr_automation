@@ -181,37 +181,37 @@ def inventory_management():
 
 
 ###########################################################################################################################################
-# @application.route('/api/one_on_one_meetings', methods=['GET'])
-# def map_managers_to_employees():
-#     # Connect to MongoDB
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
+@application.route('/api/one_on_one_meetings', methods=['GET'])
+def map_managers_to_employees():
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
 
-#     # Fetch all employee records
-#     employees = db.Employee_meetingdetails.find()
+    # Fetch all employee records
+    employees = db.Employee_meetingdetails.find()
 
-#     # Manager to employees map
-#     manager_map = {}
+    # Manager to employees map
+    manager_map = {}
 
-#     for emp in employees:
-#         manager = emp.get("manager")
-#         employee_name = emp.get("name")
-#         designation = emp.get("designation", "")  # Default to empty string if not present
+    for emp in employees:
+        manager = emp.get("manager")
+        employee_name = emp.get("name")
+        designation = emp.get("designation", "")  # Default to empty string if not present
 
-#         if manager:
-#             if manager not in manager_map:
-#                 manager_map[manager] = []
+        if manager:
+            if manager not in manager_map:
+                manager_map[manager] = []
 
-#             # Add name + designation
-#             manager_map[manager].append({
-#                 "name": employee_name,
-#                 "designation": designation
-#             })
+            # Add name + designation
+            manager_map[manager].append({
+                "name": employee_name,
+                "designation": designation
+            })
 
-#     return jsonify({
-#         "success": True,
-#         "manager_employee_map": manager_map
-#     })
+    return jsonify({
+        "success": True,
+        "manager_employee_map": manager_map
+    })
 
 
 @application.route("/api/performance_meetings", methods=['GET'])
