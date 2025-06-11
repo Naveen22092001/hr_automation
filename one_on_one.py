@@ -1,47 +1,135 @@
-from pymongo import MongoClient
+# from pymongo import MongoClient
 
-def save_meeting_to_db(data):
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    collection = db["Employee_meetingdetails"]
+# def save_meeting_to_db(data):
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Employee_meetingdetails"]
 
-    required_fields = ["name", "manager", "month", "year", "isCompleted", "notes"]
-    for field in required_fields:
-        if field not in data:
-            return {"error": f"'{field}' is required"}, 400
+#     required_fields = ["name", "manager", "month", "year", "isCompleted", "notes"]
+#     for field in required_fields:
+#         if field not in data:
+#             return {"error": f"'{field}' is required"}, 400
 
-    collection.update_one(
-        {"name": data["name"], "manager": data["manager"]},
-        {"$set": {
-            "month": data["month"],
-            "year": data["year"],
-            "isCompleted": data["isCompleted"],
-            "notes": data["notes"]
-        }},
-        upsert=True
-    )
+#     collection.update_one(
+#         {"name": data["name"], "manager": data["manager"]},
+#         {"$set": {
+#             "month": data["month"],
+#             "year": data["year"],
+#             "isCompleted": data["isCompleted"],
+#             "notes": data["notes"]
+#         }},
+#         upsert=True
+#     )
 
-    return {"message": "Meeting data saved successfully"}, 200
+#     return {"message": "Meeting data saved successfully"}, 200
 
-def save_performance_meeting_to_db(data):
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    collection = db["Employee_performance_meeting"]
+# def save_performance_meeting_to_db(data):
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     collection = db["Employee_performance_meeting"]
 
-    required_fields = ["name", "manager", "month", "year", "isCompleted", "notes"]
-    for field in required_fields:
-        if field not in data:
-            return {"error": f"'{field}' is required"}, 400
+#     required_fields = ["name", "manager", "month", "year", "isCompleted", "notes"]
+#     for field in required_fields:
+#         if field not in data:
+#             return {"error": f"'{field}' is required"}, 400
 
-    collection.update_one(
-        {"name": data["name"], "manager": data["manager"]},
-        {"$set": {
-            "month": data["month"],
-            "year": data["year"],
-            "isCompleted": data["isCompleted"],
-            "notes": data["notes"]
-        }},
-        upsert=True
-    )
+#     collection.update_one(
+#         {"name": data["name"], "manager": data["manager"]},
+#         {"$set": {
+#             "month": data["month"],
+#             "year": data["year"],
+#             "isCompleted": data["isCompleted"],
+#             "notes": data["notes"]
+#         }},
+#         upsert=True
+#     )
 
-    return {"message": "Meeting data saved successfully"}, 200
+#     return {"message": "Meeting data saved successfully"}, 200
+
+
+from pymongo import MongoClient, errors
+
+# ────────────────────────────────────────────────────────────────────────────────
+# One-on-one meeting helper
+# ────────────────────────────────────────────────────────────────────────────────
+def save_meeting_to_db(data: dict):
+    """
+    Upsert a one-on-one meeting document keyed by
+    (name, manager, month, year).
+
+    Returns (dict, http_code)
+    """
+    required = {"name", "manager", "month", "year", "isCompleted", "notes"}
+    if missing := required.difference(data):
+        # e.g. {'year'}  →  "'year' is required"
+        field = missing.pop()
+        return {"error": f"'{field}' is required"}, 400
+
+    try:
+        client = MongoClient(
+            "mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/"
+        )
+        collection = client["Timesheet"]["Employee_meetingdetails"]
+
+        # Upsert on the unique (name, manager, month, year) key
+        collection.update_one(
+            {
+                "name":     data["name"],
+                "manager":  data["manager"],
+                "month":    data["month"],
+                "year":     data["year"],
+            },
+            {
+                "$set": {
+                    "isCompleted": data["isCompleted"],
+                    "notes":       data["notes"],
+                }
+            },
+            upsert=True,
+        )
+        return {"message": "Meeting data saved/updated successfully"}, 200
+
+    except errors.PyMongoError as exc:
+        return {"error": str(exc)}, 500
+
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Performance-meeting helper   (same idea, different collection)
+# ────────────────────────────────────────────────────────────────────────────────
+def save_performance_meeting_to_db(data: dict):
+    """
+    Upsert a performance-meeting document keyed by
+    (name, manager, month, year).
+
+    Returns (dict, http_code)
+    """
+    required = {"name", "manager", "month", "year", "isCompleted", "notes"}
+    if missing := required.difference(data):
+        field = missing.pop()
+        return {"error": f"'{field}' is required"}, 400
+
+    try:
+        client = MongoClient(
+            "mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/"
+        )
+        collection = client["Timesheet"]["Employee_performance_meeting"]
+
+        collection.update_one(
+            {
+                "name":     data["name"],
+                "manager":  data["manager"],
+                "month":    data["month"],
+                "year":     data["year"],
+            },
+            {
+                "$set": {
+                    "isCompleted": data["isCompleted"],
+                    "notes":       data["notes"],
+                }
+            },
+            upsert=True,
+        )
+        return {"message": "Performance-meeting data saved/updated successfully"}, 200
+
+    except errors.PyMongoError as exc:
+        return {"error": str(exc)}, 500
