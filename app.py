@@ -215,7 +215,7 @@ def map_managers_to_employees():
 
 
 @application.route("/api/performance_meetings", methods=['GET'])
-def map_managers_to_employees():
+def map_managers_to_employees_for_performance():
     # Connect to MongoDB
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
