@@ -295,42 +295,84 @@ def get_one_on_one_meetings():
     })
 
 
+# @application.route('/api/one_on_one_meetings', methods=['POST'])
+# def save_one_on_one_meetings():
+#     data = request.get_json(force=True)
+
+#     # Validate required fields
+#     required = ["month", "year", "manager", "employees"]
+#     if not all(key in data for key in required):
+#         return jsonify({
+#             "success": False,
+#             "message": "Missing required fields: month, year, manager, employees"
+#         }), 400
+
+#     month = data["month"]
+#     year = int(data["year"])
+#     manager = data["manager"]
+#     employees = data["employees"]
+
+#     # Get today's date in YYYY-MM-DD format
+#     today_date = datetime.today().strftime("%Y-%m-%d")
+
+#     # Ensure each employee has a date (only date, no time)
+#     for emp in employees:
+#         emp["date"] = emp.get("date", today_date)
+
+#     # Connect to MongoDB
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+
+#     # Upsert (update if exists, insert if not)
+#     result = db.One_on_one_status.update_one(
+#         {"manager": manager, "month": month, "year": year},
+#         {
+#             "$set": {
+#                 "employees": employees
+#             }
+#         },
+#         upsert=True
+#     )
+
+#     return jsonify({
+#         "success": True,
+#         "message": "Saved successfully",
+#         "updated": bool(result.modified_count),
+#         "inserted": bool(result.upserted_id)
+#     }), 200
+
 @application.route('/api/one_on_one_meetings', methods=['POST'])
 def save_one_on_one_meetings():
     data = request.get_json(force=True)
 
-    # Validate required fields
+    # -------- validate body --------
     required = ["month", "year", "manager", "employees"]
-    if not all(key in data for key in required):
+    if not all(k in data for k in required):
         return jsonify({
             "success": False,
             "message": "Missing required fields: month, year, manager, employees"
         }), 400
 
-    month = data["month"]
-    year = int(data["year"])
-    manager = data["manager"]
+    month     = data["month"]
+    year      = int(data["year"])      # your sample body has "year" as string → convert to int
+    manager   = data["manager"]
     employees = data["employees"]
 
-    # Get today's date in YYYY-MM-DD format
-    today_date = datetime.today().strftime("%Y-%m-%d")
-
-    # Ensure each employee has a date (only date, no time)
+    # -------- ensure each employee has a date (YYYY-MM-DD) --------
+    today_str = datetime.today().strftime("%Y-%m-%d")
     for emp in employees:
-        emp["date"] = emp.get("date", today_date)
+        emp["date"] = emp.get("date", today_str)
 
-    # Connect to MongoDB
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    # -------- Mongo connection --------
+    client = MongoClient(
+        "mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/"
+    )
     db = client["Timesheet"]
 
-    # Upsert (update if exists, insert if not)
+    # -------- upsert the record --------
     result = db.One_on_one_status.update_one(
         {"manager": manager, "month": month, "year": year},
-        {
-            "$set": {
-                "employees": employees
-            }
-        },
+        {"$set": {"employees": employees}},
         upsert=True
     )
 
