@@ -180,12 +180,12 @@ def inventory_management():
 #     response, status_code =save_performance_meeting_to_db(data)
 #     return jsonify(response), status_code
 
-@application.route('/api/map_managers_employees', methods=['GET'])
+@application.route('/api/one_on_one_meetings', methods=['GET'])
 def map_managers_to_employees():
     # Fetch all employee records
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
-    
+
     employees = db.Employee_meetingdetails.find()
 
     # Initialize the manager-employee mapping dictionary
