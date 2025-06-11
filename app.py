@@ -3,8 +3,6 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
 import logging
-import os
-from meetings import fetch_meetings_for_month, save_meeting_status
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
 from admin_side import add_available_inventory, delete_inventory_items, edit_inventory_item, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
 application = Flask(__name__)
@@ -181,40 +179,42 @@ def inventory_management():
 #     response, status_code =save_performance_meeting_to_db(data)
 #     return jsonify(response), status_code
 
-@application.route('/api/one_on_one_meetings', methods=['GET'])
-def map_managers_to_employees():
-    # Connect to MongoDB
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
 
-    # Fetch all employee records
-    employees = db.Employee_meetingdetails.find()
+###########################################################################################################################################
+# @application.route('/api/one_on_one_meetings', methods=['GET'])
+# def map_managers_to_employees():
+#     # Connect to MongoDB
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
 
-    # Manager to employees map
-    manager_map = {}
+#     # Fetch all employee records
+#     employees = db.Employee_meetingdetails.find()
 
-    for emp in employees:
-        manager = emp.get("manager")
-        employee_name = emp.get("name")
-        designation = emp.get("designation", "")  # Default to empty string if not present
+#     # Manager to employees map
+#     manager_map = {}
 
-        if manager:
-            if manager not in manager_map:
-                manager_map[manager] = []
+#     for emp in employees:
+#         manager = emp.get("manager")
+#         employee_name = emp.get("name")
+#         designation = emp.get("designation", "")  # Default to empty string if not present
 
-            # Add name + designation
-            manager_map[manager].append({
-                "name": employee_name,
-                "designation": designation
-            })
+#         if manager:
+#             if manager not in manager_map:
+#                 manager_map[manager] = []
 
-    return jsonify({
-        "success": True,
-        "manager_employee_map": manager_map
-    })
+#             # Add name + designation
+#             manager_map[manager].append({
+#                 "name": employee_name,
+#                 "designation": designation
+#             })
+
+#     return jsonify({
+#         "success": True,
+#         "manager_employee_map": manager_map
+#     })
 
 
-@application.route('/api/one_on_one_meetings', methods=['GET'])
+@application.route("/api/performance_meetings", methods=['GET'])
 def map_managers_to_employees():
     # Connect to MongoDB
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
@@ -249,7 +249,7 @@ def map_managers_to_employees():
 
 @application.route('/api/one_on_one_meetings', methods=['GET'])
 def get_one_on_one_meetings():
-    client = MongoClient("your_connection_string")
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
     # Get query params for filtering (optional but recommended)
