@@ -180,22 +180,27 @@ def inventory_management():
 #     response, status_code =save_performance_meeting_to_db(data)
 #     return jsonify(response), status_code
 
-@application.route("/api/one_on_one_meetings", methods=["GET"])
-def api_get_meetings():
-    manager = request.args.get("manager")  # optional filter
-    month   = request.args.get("month")
-    year    = request.args.get("year")
+@application.route('/api/map_managers_employees', methods=['GET'])
+def map_managers_to_employees():
+    # Fetch all employee records
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    
+    employees = db.Employee_meetingdetails.find()
 
-    if not (month and year):
-        return jsonify({"error": "month & year query params are required"}), 400
+    # Initialize the manager-employee mapping dictionary
+    manager_map = {}
 
-    data = fetch_meetings_for_month(manager, month, year)
-    return jsonify({"meetings": data}), 200
+    for emp in employees:
+        manager = emp.get("manager")
+        employee_name = emp.get("name")
 
+        if manager:
+            if manager not in manager_map:
+                manager_map[manager] = []
+            manager_map[manager].append(employee_name)
 
-# -------- POST /api/one_on_one_meetings --------------------------------
-@application.route("/api/one_on_one_meetings", methods=["POST"])
-def api_save_status():
-    payload = request.get_json() or {}
-    resp, code = save_meeting_status(payload)
-    return jsonify(resp), code
+    return jsonify({
+        "success": True,
+        "manager_employee_map": manager_map
+    })
