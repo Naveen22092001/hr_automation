@@ -247,53 +247,92 @@ def map_managers_to_employees_for_performance():
     })
 
 
+# @application.route('/api/one_on_one_meetings', methods=['GET'])
+# def get_one_on_one_meetings():
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+
+#     # Get query params for filtering (optional but recommended)
+#     month = request.args.get('month')
+#     year = request.args.get('year')
+
+#     # Fetch static employee list
+#     employees = list(db.Employee_meetingdetails.find())
+
+#     # Fetch completed records
+#     completed = db.One_on_one_status.find({
+#         "month": month,
+#         "year": year
+#     })
+
+#     # Convert completed status to lookup
+#     completed_lookup = {
+#         (c['name'], c['month'], c['year']): c['isCompleted']
+#         for c in completed
+#     }
+
+#     # Combine both: static list + dynamic completion
+#     result = []
+#     for emp in employees:
+#         emp_name = emp.get("name")
+#         emp_manager = emp.get("manager")
+#         emp_designation = emp.get("designation")
+
+#         is_completed = completed_lookup.get((emp_name, month, year), False)
+
+#         result.append({
+#             "name": emp_name,
+#             "manager": emp_manager,
+#             "designation": emp_designation,
+#             "month": month,
+#             "year": year,
+#             "isCompleted": is_completed
+#         })
+
+#     return jsonify({
+#         "success": True,
+#         "meetings": result
+#     })
 @application.route('/api/one_on_one_meetings', methods=['GET'])
 def get_one_on_one_meetings():
+    manager = request.args.get("manager")
+    month = request.args.get("month")
+    year = int(request.args.get("year"))
+
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
-    # Get query params for filtering (optional but recommended)
-    month = request.args.get('month')
-    year = request.args.get('year')
+    # 1. Static list of employees under the manager
+    static_employees = list(db.Employee_meetingdetails.find(
+        {"manager": manager},
+        {"_id": 0, "name": 1, "designation": 1}
+    ))
 
-    # Fetch static employee list
-    employees = list(db.Employee_meetingdetails.find())
-
-    # Fetch completed records
-    completed = db.One_on_one_status.find({
+    # 2. Get saved status data from One_on_one_status
+    saved_status_doc = db.One_on_one_status.find_one({
+        "manager": manager,
         "month": month,
         "year": year
     })
 
-    # Convert completed status to lookup
-    completed_lookup = {
-        (c['name'], c['month'], c['year']): c['isCompleted']
-        for c in completed
-    }
+    # 3. Create a map for quick lookup
+    status_map = {}
+    if saved_status_doc:
+        for emp in saved_status_doc.get("employees", []):
+            status_map[emp["name"]] = emp.get("status", "pending")
 
-    # Combine both: static list + dynamic completion
-    result = []
-    for emp in employees:
-        emp_name = emp.get("name")
-        emp_manager = emp.get("manager")
-        emp_designation = emp.get("designation")
-
-        is_completed = completed_lookup.get((emp_name, month, year), False)
-
-        result.append({
-            "name": emp_name,
-            "manager": emp_manager,
-            "designation": emp_designation,
-            "month": month,
-            "year": year,
-            "isCompleted": is_completed
-        })
+    # 4. Merge: add only status, not date
+    for emp in static_employees:
+        name = emp["name"]
+        emp["status"] = status_map.get(name, "pending")
 
     return jsonify({
         "success": True,
-        "meetings": result
+        "month": month,
+        "year": year,
+        "manager": manager,
+        "employees": static_employees
     })
-
 
 # @application.route('/api/one_on_one_meetings', methods=['POST'])
 # def save_one_on_one_meetings():
