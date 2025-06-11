@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -211,3 +212,131 @@ def map_managers_to_employees():
         "success": True,
         "manager_employee_map": manager_map
     })
+
+
+@application.route('/api/one_on_one_meetings', methods=['GET'])
+def map_managers_to_employees():
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # Fetch all employee records
+    employees = db.Employee_meetingdetails.find()
+
+    # Manager to employees map
+    manager_map = {}
+
+    for emp in employees:
+        manager = emp.get("manager")
+        employee_name = emp.get("name")
+        designation = emp.get("designation", "")  # Default to empty string if not present
+
+        if manager:
+            if manager not in manager_map:
+                manager_map[manager] = []
+
+            # Add name + designation
+            manager_map[manager].append({
+                "name": employee_name,
+                "designation": designation
+            })
+
+    return jsonify({
+        "success": True,
+        "manager_employee_map": manager_map
+    })
+
+
+@application.route('/api/one_on_one_meetings', methods=['GET'])
+def get_one_on_one_meetings():
+    client = MongoClient("your_connection_string")
+    db = client["Timesheet"]
+
+    # Get query params for filtering (optional but recommended)
+    month = request.args.get('month')
+    year = request.args.get('year')
+
+    # Fetch static employee list
+    employees = list(db.Employee_meetingdetails.find())
+
+    # Fetch completed records
+    completed = db.One_on_one_status.find({
+        "month": month,
+        "year": year
+    })
+
+    # Convert completed status to lookup
+    completed_lookup = {
+        (c['name'], c['month'], c['year']): c['isCompleted']
+        for c in completed
+    }
+
+    # Combine both: static list + dynamic completion
+    result = []
+    for emp in employees:
+        emp_name = emp.get("name")
+        emp_manager = emp.get("manager")
+        emp_designation = emp.get("designation")
+
+        is_completed = completed_lookup.get((emp_name, month, year), False)
+
+        result.append({
+            "name": emp_name,
+            "manager": emp_manager,
+            "designation": emp_designation,
+            "month": month,
+            "year": year,
+            "isCompleted": is_completed
+        })
+
+    return jsonify({
+        "success": True,
+        "meetings": result
+    })
+
+
+@application.route('/api/one_on_one_meetings', methods=['POST'])
+def save_one_on_one_meetings():
+    data = request.get_json(force=True)
+
+    # Validate required fields
+    required = ["month", "year", "manager", "employees"]
+    if not all(key in data for key in required):
+        return jsonify({
+            "success": False,
+            "message": "Missing required fields: month, year, manager, employees"
+        }), 400
+
+    month = data["month"]
+    year = int(data["year"])
+    manager = data["manager"]
+    employees = data["employees"]
+
+    # Get today's date in YYYY-MM-DD format
+    today_date = datetime.today().strftime("%Y-%m-%d")
+
+    # Ensure each employee has a date (only date, no time)
+    for emp in employees:
+        emp["date"] = emp.get("date", today_date)
+
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # Upsert (update if exists, insert if not)
+    result = db.One_on_one_status.update_one(
+        {"manager": manager, "month": month, "year": year},
+        {
+            "$set": {
+                "employees": employees
+            }
+        },
+        upsert=True
+    )
+
+    return jsonify({
+        "success": True,
+        "message": "Saved successfully",
+        "updated": bool(result.modified_count),
+        "inserted": bool(result.upserted_id)
+    }), 200
