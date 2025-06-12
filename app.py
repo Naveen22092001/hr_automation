@@ -359,7 +359,7 @@ def save_individual_one_on_one_status():
     db = client["Timesheet"]
 
     # Try to update the specific employee's status
-    update_result = db.One_on_one_status.update_one(
+    update_result = db.One_on_one_status.insert_one(
         {
             "manager": manager_name,
             "month": month,
