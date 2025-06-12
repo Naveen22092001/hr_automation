@@ -338,49 +338,53 @@ def map_managers_to_employees_for_performance():
 
 
 @application.route('/api/one_on_one_meetings', methods=['POST'])
-def save_individual_one_on_one_status():
+def save_completed_one_on_one_meeting():
     data = request.get_json(force=True)
 
-    required_fields = ["manager_name", "employee_name", "date", "month", "year"]
+    # Required fields
+    required_fields = ["manager_name", "employee_name", "month", "year", "date"]
     if not all(field in data for field in required_fields):
         return jsonify({
             "success": False,
-            "message": "Missing required fields: manager_name, employee_name, date, month, year"
+            "message": "Missing required fields"
         }), 400
 
-    manager_name = data["manager_name"]
-    employee_name = data["employee_name"]
-    date = data["date"]
+    # Extract fields
+    manager = data["manager_name"]
+    employee = data["employee_name"]
     month = data["month"]
     year = int(data["year"])
+    date = data["date"]  # Assuming already in 'YYYY-MM-DD' format
 
     # Connect to MongoDB
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
-    # Try to update the specific employee's status
-    update_result = db.One_on_one_status.insert_one(
-        {
-            "manager": manager_name,
-            "month": month,
-            "year": year,
-            "employees.name": employee_name
-        },
-        {
-            "$set": {
-                "employees.$.status": "completed",
-                "employees.$.date": date
-            }
-        }
-    )
+    # Optional: Prevent duplicate insertions
+    existing = db.One_on_one_completed.find_one({
+        "manager": manager,
+        "employee": employee,
+        "month": month,
+        "year": year
+    })
 
-    if update_result.modified_count == 0:
+    if existing:
         return jsonify({
             "success": False,
-            "message": f"No matching employee '{employee_name}' found under manager '{manager_name}' for {month} {year}"
-        }), 404
+            "message": "This one-on-one meeting record already exists"
+        }), 409  # Conflict
+
+    # Insert the completed meeting
+    db.One_on_one_completed.insert_one({
+        "manager": manager,
+        "employee": employee,
+        "month": month,
+        "year": year,
+        "date": date,
+        "status": "completed"
+    })
 
     return jsonify({
         "success": True,
-        "message": f"Status updated for {employee_name} under {manager_name} for {month} {year}"
+        "message": "One-on-one meeting saved successfully"
     }), 200
