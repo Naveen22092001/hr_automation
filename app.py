@@ -181,37 +181,37 @@ def inventory_management():
 
 
 ###########################################################################################################################################
-# @application.route('/api/one_on_one_meetings', methods=['GET'])
-# def map_managers_to_employees():
-#     # Connect to MongoDB
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
+@application.route('/api/one_on_one_meetings', methods=['GET'])
+def map_managers_to_employees():
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
 
-#     # Fetch all employee records
-#     employees = db.Employee_meetingdetails.find()
+    # Fetch all employee records
+    employees = db.Employee_meetingdetails.find()
 
-#     # Manager to employees map
-#     manager_map = {}
+    # Manager to employees map
+    manager_map = {}
 
-#     for emp in employees:
-#         manager = emp.get("manager")
-#         employee_name = emp.get("name")
-#         designation = emp.get("designation", "")  # Default to empty string if not present
+    for emp in employees:
+        manager = emp.get("manager")
+        employee_name = emp.get("name")
+        designation = emp.get("designation", "")  # Default to empty string if not present
 
-#         if manager:
-#             if manager not in manager_map:
-#                 manager_map[manager] = []
+        if manager:
+            if manager not in manager_map:
+                manager_map[manager] = []
 
-#             # Add name + designation
-#             manager_map[manager].append({
-#                 "name": employee_name,
-#                 "designation": designation
-#             })
+            # Add name + designation
+            manager_map[manager].append({
+                "name": employee_name,
+                "designation": designation
+            })
 
-#     return jsonify({
-#         "success": True,
-#         "manager_employee_map": manager_map
-#     })
+    return jsonify({
+        "success": True,
+        "manager_employee_map": manager_map
+    })
 
 
 @application.route("/api/performance_meetings", methods=['GET'])
@@ -295,46 +295,46 @@ def map_managers_to_employees_for_performance():
 #     })
 
 #option2
-@application.route('/api/one_on_one_meetings', methods=['GET'])
-def get_one_on_one_meetings():
-    manager = request.args.get("manager")
-    month = request.args.get("month")
-    year = int(request.args.get("year"))
+# @application.route('/api/one_on_one_meetings', methods=['GET'])
+# def get_one_on_one_meetings():
+#     manager = request.args.get("manager")
+#     month = request.args.get("month")
+#     year = int(request.args.get("year"))
 
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
 
-    # 1. Static list of employees under the manager
-    static_employees = list(db.Employee_meetingdetails.find(
-        {"manager": manager},
-        {"_id": 0, "name": 1, "designation": 1}
-    ))
+#     # 1. Static list of employees under the manager
+#     static_employees = list(db.Employee_meetingdetails.find(
+#         {"manager": manager},
+#         {"_id": 0, "name": 1, "designation": 1}
+#     ))
 
-    # 2. Get saved status data from One_on_one_status
-    saved_status_doc = db.One_on_one_status.find_one({
-        "manager": manager,
-        "month": month,
-        "year": year
-    })
+#     # 2. Get saved status data from One_on_one_status
+#     saved_status_doc = db.One_on_one_status.find_one({
+#         "manager": manager,
+#         "month": month,
+#         "year": year
+#     })
 
-    # 3. Create a map for quick lookup
-    status_map = {}
-    if saved_status_doc:
-        for emp in saved_status_doc.get("employees", []):
-            status_map[emp["name"]] = emp.get("status", "pending")
+#     # 3. Create a map for quick lookup
+#     status_map = {}
+#     if saved_status_doc:
+#         for emp in saved_status_doc.get("employees", []):
+#             status_map[emp["name"]] = emp.get("status", "pending")
 
-    # 4. Merge: add only status, not date
-    for emp in static_employees:
-        name = emp["name"]
-        emp["status"] = status_map.get(name, "pending")
+#     # 4. Merge: add only status, not date
+#     for emp in static_employees:
+#         name = emp["name"]
+#         emp["status"] = status_map.get(name, "pending")
 
-    return jsonify({
-        "success": True,
-        "month": month,
-        "year": year,
-        "manager": manager,
-        "employees": static_employees
-    })
+#     return jsonify({
+#         "success": True,
+#         "month": month,
+#         "year": year,
+#         "manager": manager,
+#         "employees": static_employees
+#     })
 
 
 @application.route('/api/one_on_one_meetings', methods=['POST'])
