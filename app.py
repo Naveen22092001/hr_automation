@@ -325,7 +325,7 @@ def save_completed_one_on_one_meeting():
     db = client["Timesheet"]
 
     # Prevent duplicates
-    existing = db.One_on_one_completed.find_one({
+    existing = db.One_on_one_status.find_one({
         "manager": manager,
         "employee": employee,
         "month": month,
@@ -339,7 +339,7 @@ def save_completed_one_on_one_meeting():
         }), 409
 
     # Insert the completed record
-    db.One_on_one_completed.insert_one({
+    db.One_on_one_status.insert_one({
         "manager": manager,
         "employee": employee,
         "designation": designation,
