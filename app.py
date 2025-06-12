@@ -380,7 +380,7 @@ def get_meeting_lookup(manager_name, month, year):
     static_employees = static_doc.get("employees", [])
 
     # Get completed records for the manager/month/year
-    completed = db.One_on_one_completed.find({
+    completed = db.One_on_one_status.find({
         "manager": manager_name,
         "month": month,
         "year": year
