@@ -300,11 +300,12 @@ def map_managers_to_employees_for_performance():
 #         "message": "One-on-one meeting saved successfully"
 #     }), 200
 
+
+
 @application.route('/api/one_on_one_meetings', methods=['POST'])
 def save_completed_one_on_one_meeting():
     data = request.get_json(force=True)
 
-    # Required fields
     required_fields = ["manager_name", "employee_name", "designation", "month", "year", "date"]
     if not all(field in data for field in required_fields):
         return jsonify({
@@ -312,7 +313,6 @@ def save_completed_one_on_one_meeting():
             "message": "Missing required fields"
         }), 400
 
-    # Extract fields
     manager = data["manager_name"]
     employee = data["employee_name"]
     designation = data["designation"]
@@ -320,7 +320,7 @@ def save_completed_one_on_one_meeting():
     year = int(data["year"])
     date = data["date"]
 
-    # Connect to MongoDB
+    # Mongo connection
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
@@ -336,9 +336,9 @@ def save_completed_one_on_one_meeting():
         return jsonify({
             "success": False,
             "message": "This one-on-one meeting record already exists"
-        }), 409  # Conflict
+        }), 409
 
-    # Insert with designation
+    # Insert the completed record
     db.One_on_one_completed.insert_one({
         "manager": manager,
         "employee": employee,
@@ -353,6 +353,7 @@ def save_completed_one_on_one_meeting():
         "success": True,
         "message": "One-on-one meeting saved successfully"
     }), 200
+
 
 
 @application.route('/api/meeting_lookup/one_on_one_meetings/<manager_name>/<month>/<year>', methods=['GET'])
