@@ -374,45 +374,37 @@ def save_completed_one_on_one_meeting():
 
 
 
-@application.route('/api/meeting_lookup/one_on_one_meetings/<manager_name>/<month>/<year>', methods=['GET'])
-def get_meeting_lookup(manager_name, month, year):
-    year = int(year)
-
-    # Connect to MongoDB
+@application.route("/api/employee_status/<manager_name>/<month>/<year>")
+def get_employee_meeting_status(manager_name, month, year):
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
+    # Step 1: Get all employees under this manager
+    static_employees = list(db.Employee_meetingdetails.find({"manager": manager_name}))
 
-    # Get static list of employees under the manager
-    static_doc = db.One_on_one_status.find_one({
+    # Step 2: Get meeting status document for given manager/month/year
+    meeting_doc = db.One_on_one_status.find_one({
         "manager": manager_name,
         "month": month,
-        "year": year
+        "year": int(year)
     })
 
-    if not static_doc:
-        return jsonify({
-            "success": False,
-            "message": "No static data found for the manager and month"
-        }), 404
+    # Step 3: Create a lookup dictionary for employees who have completed the meeting
+    completed_lookup = {}
+    if meeting_doc and "employees" in meeting_doc:
+        for emp in meeting_doc["employees"]:
+            if emp.get("status") == "completed":
+                completed_lookup[emp["name"]] = True
 
-    static_employees = static_doc.get("employees", [])
-
-    # Get completed records for the manager/month/year
-    completed = db.One_on_one_status.find({
-        "manager": manager_name,
-        "month": month,
-        "year": year
-    })
-
-    completed_names = {doc["employee"] for doc in completed}
-
-    # Build the result with status
-    enriched_employees = []
+    # Step 4: Build final result combining static employee list + status
+    result = []
     for emp in static_employees:
-        enriched_employees.append({
-            "name": emp["name"],
-            "designation": emp["designation"],
-            "status": "completed" if emp["name"] in completed_names else "pending"
+        emp_name = emp.get("name")
+        emp_status = "completed" if emp_name in completed_lookup else "pending"
+        result.append({
+            "name": emp_name,
+            "designation": emp.get("designation", ""),
+            "manager": emp.get("manager", ""),
+            "status": emp_status
         })
 
     return jsonify({
@@ -420,5 +412,6 @@ def get_meeting_lookup(manager_name, month, year):
         "manager": manager_name,
         "month": month,
         "year": year,
-        "employees": enriched_employees
-    }), 200
+        "employees": result
+    })
+
