@@ -320,34 +320,52 @@ def save_completed_one_on_one_meeting():
     year = int(data["year"])
     date = data["date"]
 
-    # Mongo connection
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
-    # Prevent duplicates
-    existing = db.One_on_one_status.find_one({
+    # First, check if document for this manager/month/year exists
+    status_doc = db.One_on_one_status.find_one({
         "manager": manager,
-        "employee": employee,
         "month": month,
         "year": year
     })
 
-    if existing:
-        return jsonify({
-            "success": False,
-            "message": "This one-on-one meeting record already exists"
-        }), 409
+    if status_doc:
+        # Check if employee already in list
+        for emp in status_doc.get("employees", []):
+            if emp["name"] == employee:
+                return jsonify({
+                    "success": False,
+                    "message": "This one-on-one meeting record already exists"
+                }), 409
 
-    # Insert the completed record
-    db.One_on_one_status.insert_one({
-        "manager": manager,
-        "employee": employee,
-        "designation": designation,
-        "month": month,
-        "year": year,
-        "date": date,
-        "status": "completed"
-    })
+        # Append to existing document
+        db.One_on_one_status.update_one(
+            {"manager": manager, "month": month, "year": year},
+            {"$push": {
+                "employees": {
+                    "name": employee,
+                    "designation": designation,
+                    "status": "completed",
+                    "date": date
+                }
+            }}
+        )
+    else:
+        # Create new document
+        db.One_on_one_status.insert_one({
+            "manager": manager,
+            "month": month,
+            "year": year,
+            "employees": [
+                {
+                    "name": employee,
+                    "designation": designation,
+                    "status": "completed",
+                    "date": date
+                }
+            ]
+        })
 
     return jsonify({
         "success": True,
