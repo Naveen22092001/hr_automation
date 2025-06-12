@@ -338,42 +338,49 @@ def map_managers_to_employees_for_performance():
 
 
 @application.route('/api/one_on_one_meetings', methods=['POST'])
-def save_one_on_one_meetings():
+def save_individual_one_on_one_status():
     data = request.get_json(force=True)
 
-    required = ["month", "year", "manager", "employees"]
-    if not all(k in data for k in required):
+    required_fields = ["manager_name", "employee_name", "date", "month", "year"]
+    if not all(field in data for field in required_fields):
         return jsonify({
             "success": False,
-            "message": "Missing required fields: month, year, manager, employees"
+            "message": "Missing required fields: manager_name, employee_name, date, month, year"
         }), 400
 
+    manager_name = data["manager_name"]
+    employee_name = data["employee_name"]
+    date = data["date"]
     month = data["month"]
     year = int(data["year"])
-    manager = data["manager"]
-    employees = data["employees"]
 
     # Connect to MongoDB
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
-    # Upsert the document
-    result = db.One_on_one_status.update_one(
-        {"manager": manager, "month": month, "year": year},
+    # Try to update the specific employee's status
+    update_result = db.One_on_one_status.update_one(
+        {
+            "manager": manager_name,
+            "month": month,
+            "year": year,
+            "employees.name": employee_name
+        },
         {
             "$set": {
-                "manager": manager,
-                "month": month,
-                "year": year,
-                "employees": employees
+                "employees.$.status": "completed",
+                "employees.$.date": date
             }
-        },
-        upsert=True
+        }
     )
+
+    if update_result.modified_count == 0:
+        return jsonify({
+            "success": False,
+            "message": f"No matching employee '{employee_name}' found under manager '{manager_name}' for {month} {year}"
+        }), 404
 
     return jsonify({
         "success": True,
-        "message": "Saved successfully",
-        "updated": bool(result.modified_count),
-        "inserted": bool(result.upserted_id)
+        "message": f"Status updated for {employee_name} under {manager_name} for {month} {year}"
     }), 200
