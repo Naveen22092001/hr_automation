@@ -341,7 +341,6 @@ def map_managers_to_employees_for_performance():
 def save_one_on_one_meetings():
     data = request.get_json(force=True)
 
-    # -------- validate body --------
     required = ["month", "year", "manager", "employees"]
     if not all(k in data for k in required):
         return jsonify({
@@ -349,26 +348,26 @@ def save_one_on_one_meetings():
             "message": "Missing required fields: month, year, manager, employees"
         }), 400
 
-    month     = data["month"]
-    year      = int(data["year"])      # your sample body has "year" as string → convert to int
-    manager   = data["manager"]
+    month = data["month"]
+    year = int(data["year"])
+    manager = data["manager"]
     employees = data["employees"]
 
-    # -------- ensure each employee has a date (YYYY-MM-DD) --------
-    today_str = datetime.today().strftime("%Y-%m-%d")
-    for emp in employees:
-        emp["date"] = emp.get("date", today_str)
-
-    # -------- Mongo connection --------
-    client = MongoClient(
-        "mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/"
-    )
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
 
-    # -------- upsert the record --------
+    # Upsert the document
     result = db.One_on_one_status.update_one(
         {"manager": manager, "month": month, "year": year},
-        {"$set": {"employees": employees}},
+        {
+            "$set": {
+                "manager": manager,
+                "month": month,
+                "year": year,
+                "employees": employees
+            }
+        },
         upsert=True
     )
 
