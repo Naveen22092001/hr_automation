@@ -149,232 +149,232 @@ def inventory_management():
 
 #####################################################################################################################################
 
-# @application.route('/api/one_on_one_meetings', methods=['GET'])
-# def map_managers_to_employees():
-#     # Connect to MongoDB
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-
-#     # Fetch all employee records
-#     employees = db.Employee_meetingdetails.find()
-
-#     # Manager to employees map
-#     manager_map = {}
-
-#     for emp in employees:
-#         manager = emp.get("manager")
-#         employee_name = emp.get("name")
-#         designation = emp.get("designation", "")  # Default to empty string if not present
-
-#         if manager:
-#             if manager not in manager_map:
-#                 manager_map[manager] = []
-
-#             # Add name + designation
-#             manager_map[manager].append({
-#                 "name": employee_name,
-#                 "designation": designation
-#             })
-
-#     return jsonify({
-#         "success": True,
-#         "manager_employee_map": manager_map
-#     })
-
-
-# @application.route("/api/performance_meetings", methods=['GET'])
-# def map_managers_to_employees_for_performance():
-#     # Connect to MongoDB
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-
-#     # Fetch all employee records
-#     employees = db.Employee_meetingdetails.find()
-
-#     # Manager to employees map
-#     manager_map = {}
-
-#     for emp in employees:
-#         manager = emp.get("manager")
-#         employee_name = emp.get("name")
-#         designation = emp.get("designation", "")  # Default to empty string if not present
-
-#         if manager:
-#             if manager not in manager_map:
-#                 manager_map[manager] = []
-
-#             # Add name + designation
-#             manager_map[manager].append({
-#                 "name": employee_name,
-#                 "designation": designation
-#             })
-
-#     return jsonify({
-#         "success": True,
-#         "manager_employee_map": manager_map
-#     })
-
-# ###############################################################################################################################################
-# @application.route('/api/one_on_one_meetings', methods=['POST'])
-# def save_completed_one_on_one_meeting():
-#     data = request.get_json(force=True)
-
-#     required_fields = ["manager_name", "employee_name", "designation", "month", "year", "date"]
-#     if not all(field in data for field in required_fields):
-#         return jsonify({
-#             "success": False,
-#             "message": "Missing required fields"
-#         }), 400
-
-#     manager = data["manager_name"]
-#     employee = data["employee_name"]
-#     designation = data["designation"]
-#     month = data["month"]
-#     year = int(data["year"])
-#     date = data["date"]
-
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-
-#     # First, check if document for this manager/month/year exists
-#     status_doc = db.One_on_one_status.find_one({
-#         "manager": manager,
-#         "month": month,
-#         "year": year
-#     })
-
-#     if status_doc:
-#         # Check if employee already in list
-#         for emp in status_doc.get("employees", []):
-#             if emp["name"] == employee:
-#                 return jsonify({
-#                     "success": False,
-#                     "message": "This one-on-one meeting record already exists"
-#                 }), 409
-
-#         # Append to existing document
-#         db.One_on_one_status.update_one(
-#             {"manager": manager, "month": month, "year": year},
-#             {"$push": {
-#                 "employees": {
-#                     "name": employee,
-#                     "designation": designation,
-#                     "status": "completed",
-#                     "date": date
-#                 }
-#             }}
-#         )
-#     else:
-#         # Create new document
-#         db.One_on_one_status.insert_one({
-#             "manager": manager,
-#             "month": month,
-#             "year": year,
-#             "employees": [
-#                 {
-#                     "name": employee,
-#                     "designation": designation,
-#                     "status": "completed",
-#                     "date": date
-#                 }
-#             ]
-#         })
-
-#     return jsonify({
-#         "success": True,
-#         "message": "One-on-one meeting saved successfully"
-#     }), 200
-
-
-
-# @application.route("/api/employee_status/<manager_name>/<month>/<year>")
-# def get_employee_meeting_status(manager_name, month, year):
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     # Step 1: Get all employees under this manager
-#     static_employees = list(db.Employee_meetingdetails.find({"manager": manager_name}))
-
-#     # Step 2: Get meeting status document for given manager/month/year
-#     meeting_doc = db.One_on_one_status.find_one({
-#         "manager": manager_name,
-#         "month": month,
-#         "year": int(year)
-#     })
-
-#     # Step 3: Create a lookup dictionary for employees who have completed the meeting
-#     completed_lookup = {}
-#     if meeting_doc and "employees" in meeting_doc:
-#         for emp in meeting_doc["employees"]:
-#             if emp.get("status") == "completed":
-#                 completed_lookup[emp["name"]] = True
-
-#     # Step 4: Build final result combining static employee list + status
-#     result = []
-#     for emp in static_employees:
-#         emp_name = emp.get("name")
-#         emp_status = "completed" if emp_name in completed_lookup else "pending"
-#         result.append({
-#             "name": emp_name,
-#             "designation": emp.get("designation", ""),
-#             "manager": emp.get("manager", ""),
-#             "status": emp_status
-#         })
-
-#     return jsonify({
-#         "success": True,
-#         "manager": manager_name,
-#         "month": month,
-#         "year": year,
-#         "employees": result
-#     })
-
-
-
-@application.route("/api/one_on_one_meetings", methods=["GET"])
+@application.route('/api/one_on_one_meetings', methods=['GET'])
 def map_managers_to_employees():
-    data = get_one_on_one_mapping()
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # Fetch all employee records
+    employees = db.Employee_meetingdetails.find()
+
+    # Manager to employees map
+    manager_map = {}
+
+    for emp in employees:
+        manager = emp.get("manager")
+        employee_name = emp.get("name")
+        designation = emp.get("designation", "")  # Default to empty string if not present
+
+        if manager:
+            if manager not in manager_map:
+                manager_map[manager] = []
+
+            # Add name + designation
+            manager_map[manager].append({
+                "name": employee_name,
+                "designation": designation
+            })
+
     return jsonify({
         "success": True,
-        "manager_employee_map": data
+        "manager_employee_map": manager_map
     })
 
 
-@application.route("/api/performance_meetings", methods=["GET"])
+@application.route("/api/performance_meetings", methods=['GET'])
 def map_managers_to_employees_for_performance():
-    data = get_one_on_one_mapping()  # same function reused
+    # Connect to MongoDB
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # Fetch all employee records
+    employees = db.Employee_meetingdetails.find()
+
+    # Manager to employees map
+    manager_map = {}
+
+    for emp in employees:
+        manager = emp.get("manager")
+        employee_name = emp.get("name")
+        designation = emp.get("designation", "")  # Default to empty string if not present
+
+        if manager:
+            if manager not in manager_map:
+                manager_map[manager] = []
+
+            # Add name + designation
+            manager_map[manager].append({
+                "name": employee_name,
+                "designation": designation
+            })
+
     return jsonify({
         "success": True,
-        "manager_employee_map": data
+        "manager_employee_map": manager_map
     })
 
-
-@application.route("/api/one_on_one_meetings", methods=["POST"])
+###############################################################################################################################################
+@application.route('/api/one_on_one_meetings', methods=['POST'])
 def save_completed_one_on_one_meeting():
     data = request.get_json(force=True)
-    required_fields = ["manager_name", "employee_name", "designation", "month", "year", "date"]
 
+    required_fields = ["manager_name", "employee_name", "designation", "month", "year", "date"]
     if not all(field in data for field in required_fields):
         return jsonify({
             "success": False,
             "message": "Missing required fields"
         }), 400
 
-    success, msg = save_meeting(data)
-    if not success:
-        return jsonify({
-            "success": False,
-            "message": msg
-        }), 409
+    manager = data["manager_name"]
+    employee = data["employee_name"]
+    designation = data["designation"]
+    month = data["month"]
+    year = int(data["year"])
+    date = data["date"]
+
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # First, check if document for this manager/month/year exists
+    status_doc = db.One_on_one_status.find_one({
+        "manager": manager,
+        "month": month,
+        "year": year
+    })
+
+    if status_doc:
+        # Check if employee already in list
+        for emp in status_doc.get("employees", []):
+            if emp["name"] == employee:
+                return jsonify({
+                    "success": False,
+                    "message": "This one-on-one meeting record already exists"
+                }), 409
+
+        # Append to existing document
+        db.One_on_one_status.update_one(
+            {"manager": manager, "month": month, "year": year},
+            {"$push": {
+                "employees": {
+                    "name": employee,
+                    "designation": designation,
+                    "status": "completed",
+                    "date": date
+                }
+            }}
+        )
+    else:
+        # Create new document
+        db.One_on_one_status.insert_one({
+            "manager": manager,
+            "month": month,
+            "year": year,
+            "employees": [
+                {
+                    "name": employee,
+                    "designation": designation,
+                    "status": "completed",
+                    "date": date
+                }
+            ]
+        })
 
     return jsonify({
         "success": True,
-        "message": msg
-    })
+        "message": "One-on-one meeting saved successfully"
+    }), 200
+
 
 
 @application.route("/api/employee_status/<manager_name>/<month>/<year>")
 def get_employee_meeting_status(manager_name, month, year):
-    data = get_meeting_status(manager_name, month, year)
-    data["success"] = True
-    return jsonify(data)
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    # Step 1: Get all employees under this manager
+    static_employees = list(db.Employee_meetingdetails.find({"manager": manager_name}))
+
+    # Step 2: Get meeting status document for given manager/month/year
+    meeting_doc = db.One_on_one_status.find_one({
+        "manager": manager_name,
+        "month": month,
+        "year": int(year)
+    })
+
+    # Step 3: Create a lookup dictionary for employees who have completed the meeting
+    completed_lookup = {}
+    if meeting_doc and "employees" in meeting_doc:
+        for emp in meeting_doc["employees"]:
+            if emp.get("status") == "completed":
+                completed_lookup[emp["name"]] = True
+
+    # Step 4: Build final result combining static employee list + status
+    result = []
+    for emp in static_employees:
+        emp_name = emp.get("name")
+        emp_status = "completed" if emp_name in completed_lookup else "pending"
+        result.append({
+            "name": emp_name,
+            "designation": emp.get("designation", ""),
+            "manager": emp.get("manager", ""),
+            "status": emp_status
+        })
+
+    return jsonify({
+        "success": True,
+        "manager": manager_name,
+        "month": month,
+        "year": year,
+        "employees": result
+    })
+
+
+
+# @application.route("/api/one_on_one_meetings", methods=["GET"])
+# def map_managers_to_employees():
+#     data = get_one_on_one_mapping()
+#     return jsonify({
+#         "success": True,
+#         "manager_employee_map": data
+#     })
+
+
+# @application.route("/api/performance_meetings", methods=["GET"])
+# def map_managers_to_employees_for_performance():
+#     data = get_one_on_one_mapping()  # same function reused
+#     return jsonify({
+#         "success": True,
+#         "manager_employee_map": data
+#     })
+
+
+# @application.route("/api/one_on_one_meetings", methods=["POST"])
+# def save_completed_one_on_one_meeting():
+#     data = request.get_json(force=True)
+#     required_fields = ["manager_name", "employee_name", "designation", "month", "year", "date"]
+
+#     if not all(field in data for field in required_fields):
+#         return jsonify({
+#             "success": False,
+#             "message": "Missing required fields"
+#         }), 400
+
+#     success, msg = save_meeting(data)
+#     if not success:
+#         return jsonify({
+#             "success": False,
+#             "message": msg
+#         }), 409
+
+#     return jsonify({
+#         "success": True,
+#         "message": msg
+#     })
+
+
+# @application.route("/api/employee_status/<manager_name>/<month>/<year>")
+# def get_employee_meeting_status(manager_name, month, year):
+#     data = get_meeting_status(manager_name, month, year)
+#     data["success"] = True
+#     return jsonify(data)
 
