@@ -39,3 +39,41 @@ Timesheet System
         logging.info(f"📨 Email sent to {manager_email} with CC to {FIXED_CC_EMAILS}")
     except Exception as e:
         logging.error(f"❌ Failed to send email: {e}")
+
+
+
+
+import smtplib
+from email.message import EmailMessage
+from datetime import datetime
+
+# Gmail sender configuration
+SENDER_EMAIL = "timesheetsystem2025@gmail.com"
+SENDER_PASSWORD = "mhuv nxdf ciqz igws"
+
+def send_monthly_reminder(to_email, manager_name):
+    msg = EmailMessage()
+    msg['Subject'] = '📅 Monthly 1-on-1 Reminder'
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = to_email
+
+    month = datetime.now().strftime('%B')
+
+    msg.set_content(f"""
+Hi {manager_name},
+
+This is a gentle reminder to complete your 1-on-1 meetings with your team for the month of {month}.
+
+Please ensure all meetings are scheduled and recorded.
+
+Best regards,  
+Your TeamBot 🤖
+""")
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
+            smtp.send_message(msg)
+            print(f"✅ Email sent to {to_email}")
+    except Exception as e:
+        print(f"❌ Failed to send email to {to_email}: {str(e)}")

@@ -490,3 +490,30 @@ def save_completed_performance_meeting():
 #     data["success"] = True
 #     return jsonify(data)
 
+####################################################################################################################
+from flask import request, jsonify, abort
+from datetime import datetime
+from mail import send_monthly_reminder  # import your mail function
+
+SECRET_TOKEN = "my-super-secret"
+
+@application.route("/api/monthly-reminder", methods=["POST"])
+def monthly_reminder():
+    # Check if token is valid
+    if request.headers.get("X-Cron-Secret") != SECRET_TOKEN:
+        abort(403, description="Unauthorized")
+
+    # Only trigger on the 1st of each month
+    if datetime.today().day != 1:
+        return jsonify({"status": "Not the 1st of the month"}), 200
+
+    # Replace this with a DB query if needed
+    managers = [
+        {"name": "John", "email": "john.manager@example.com"},
+        {"name": "Clement", "email": "clement.lead@example.com"}
+    ]
+
+    for m in managers:
+        send_monthly_reminder(m['email'], m['name'])
+
+    return jsonify({"status": "Reminders sent"}), 200
