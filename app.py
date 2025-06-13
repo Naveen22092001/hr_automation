@@ -371,7 +371,7 @@ def get_performance_status(manager_name, month, year):
 
 
 @application.route("/api/performance_meetings", methods=['POST'])
-def save_completed_one_on_one_meeting():
+def save_completed_performance_meeting():
     data = request.get_json(force=True)
 
     required_fields = ["manager_name", "employee_name", "designation", "month", "year", "date"]
