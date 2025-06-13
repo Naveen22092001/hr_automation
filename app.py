@@ -327,6 +327,45 @@ def get_employee_meeting_status(manager_name, month, year):
         "employees": result
     })
 
+@application.route("/api/performance_status/<manager_name>/<month>/<year>")
+def get_performance_status(manager_name, month, year):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # Static data: get all employees under this manager
+    static_employees = list(db.Employee_meetingdetails.find({"manager": manager_name}))
+
+    # Performance tracking data
+    performance_doc = db.Performance_status.find_one({
+        "manager": manager_name,
+        "month": month,
+        "year": int(year)
+    })
+
+    # Lookup for completed employees
+    completed_lookup = {}
+    if performance_doc and "employees" in performance_doc:
+        for emp in performance_doc["employees"]:
+            if emp.get("status") == "completed":
+                completed_lookup[emp["name"]] = True
+
+    # Build the response
+    employee_list = []
+    for emp in static_employees:
+        emp_name = emp.get("name")
+        employee_list.append({
+            "name": emp_name,
+            "designation": emp.get("designation", ""),
+            "status": "completed" if emp_name in completed_lookup else "pending"
+        })
+
+    return jsonify({
+        "success": True,
+        "manager": manager_name,
+        "month": month,
+        "year": year,
+        "employees": employee_list
+    })
 
 
 # @application.route("/api/one_on_one_meetings", methods=["GET"])
