@@ -532,3 +532,48 @@ HR Automation Team
         "success": True,
         "message": "One-on-One email reminders sent successfully"
     })
+
+
+@application.route("/api/monthly-performance-reminder", methods=["POST"])
+def send_monthly_performance_reminder():
+    # MongoDB connection
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+
+    # Get current month and year
+    now = datetime.now()
+    month = now.strftime("%B")  # e.g., "June"
+    year = now.year
+
+    # Get distinct manager names from employee data
+    managers = db.Employee_meetingdetails.distinct("manager")
+
+    for manager in managers:
+        employee = db.Employee_meetingdetails.find_one({"manager": manager})
+        if employee and "manager_email" in employee:
+            manager_email = employee["manager_email"]
+
+            # Email content
+            subject = f"Performance Review Reminder – {month} {year}"
+            body = f"""
+Dear {manager},
+
+This is a reminder to complete performance reviews for your team for the month of {month} {year}.
+
+Please make sure to update the performance meeting status in the system.
+
+Login here: https://singh-automation-hr-management.netlify.app/login/  
+Username: admin  
+Password: admin
+
+Thank you,  
+HR Automation Team
+            """
+
+            # Send the email
+            send_reminder_email(to_email=manager_email, subject=subject, body=body)
+
+    return jsonify({
+        "success": True,
+        "message": "Performance email reminders sent successfully"
+    })
