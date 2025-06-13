@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
 import logging
+from reminder import send_reminder_email
 from user_side import add_inventory, delete_inventory, edit_inventory, employee_login, get_inventory, submit_inventory_request
 from admin_side import add_available_inventory, delete_inventory_items, edit_inventory_item, fetch_all_inventory_details, fetch_available_inventory_data, get_inventory_collection, modify_available_inventory
 application = Flask(__name__)
@@ -491,29 +492,43 @@ def save_completed_performance_meeting():
 #     return jsonify(data)
 
 ####################################################################################################################
-from flask import request, jsonify, abort
-from datetime import datetime
-from mail import send_monthly_reminder  # import your mail function
+@application.route("/api/monthly-oneonone-reminder", methods=["POST"])
+def send_monthly_oneonone_reminder():
+    # MongoDB setup
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
 
-SECRET_TOKEN = "my-super-secret"
+    # Current month and year
+    now = datetime.now()
+    month = now.strftime("%B")  # Example: "June"
+    year = now.year
 
-@application.route("/api/monthly-reminder", methods=["POST"])
-def monthly_reminder():
-    # Check if token is valid
-    if request.headers.get("X-Cron-Secret") != SECRET_TOKEN:
-        abort(403, description="Unauthorized")
+    # Step 1: Get distinct manager names from employee data
+    managers = db.Employee_meetingdetails.distinct("manager")
 
-    # Only trigger on the 1st of each month
-    if datetime.today().day != 1:
-        return jsonify({"status": "Not the 1st of the month"}), 200
+    # Step 2: For each manager, get their email and send reminder
+    for manager in managers:
+        employee = db.Employee_meetingdetails.find_one({"manager": manager})
+        if employee and "manager_email" in employee:
+            manager_email = employee["manager_email"]
 
-    # Replace this with a DB query if needed
-    managers = [
-        {"name": "John", "email": "john.manager@example.com"},
-        {"name": "Clement", "email": "clement.lead@example.com"}
-    ]
+            # Email content
+            subject = "Monthly One-on-One Reminder"
+            body = f"""
+Dear {manager},
 
-    for m in managers:
-        send_monthly_reminder(m['email'], m['name'])
+This is a reminder to complete your One-on-One meetings for the month of {month} {year}.
 
-    return jsonify({"status": "Reminders sent"}), 200
+Please log all completed meetings in the system.
+
+Thank you,
+HR Automation Team
+            """
+
+            # Send the email
+            send_reminder_email(to_email=manager_email, subject=subject, body=body)
+
+    return jsonify({
+        "success": True,
+        "message": "One-on-One email reminders sent successfully"
+    })
